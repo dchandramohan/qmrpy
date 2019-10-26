@@ -1,0 +1,6 @@
+#
+####### requirements.txt for qmrpy #######
+#
+####### Requirements without Version Specifiers ########
+scipy
+numpy
