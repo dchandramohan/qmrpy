@@ -56,7 +56,7 @@ class SPGR_T2strw_complex(BaseModel):
 
                     self.fit_results[xi,yi,zi,:] = result.x
 
-    def calc_parm_est(self, voxel_signal):
+    def calc_param_est(self, voxel_signal):
         M0_est = np.max(voxel_signal)
         T2str_est = (np.log(voxel_signal[1]) - np.log(voxel_signal[0]))/(self.TE[1] - self.TE[0]) 
         
