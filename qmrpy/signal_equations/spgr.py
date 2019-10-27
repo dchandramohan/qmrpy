@@ -74,3 +74,38 @@ def T1w_mag(K, T1, TR, alph):
     """Expected signal for T1w UTE GRE 'magnitude' images"""
     S = K * ((np.sin(alph) * (1 - np.exp((-1.0 * TR)/T1))) / (1 - (np.cos(alph) * np.exp((-1.0 * TR)/T1))))
     return S
+
+def spgr_complex_flex_experimental(M0=None, T1=None, T2str=None, TR=None, TE=None, alph=None, c_shift=None, del_B0=None, phi=None):
+    """Spoiled Gradient Recall at Steady State (SPGR) signal equation"""
+
+    if not M0:
+        M0 = 1.0
+
+    if not (T1 and TR and alph):
+        T1_part = 1.0
+    else:
+        T1_part = ((np.sin(alph) * (1 - np.exp(-TR/T1)))/(1 - (np.cos(alph) * np.exp(-TR/T1))))
+
+    if not (T2str and TE):
+        T2_part = 1.0
+    else:
+        np.exp(-TE/T2str(-1.0 * TE)/T2str)
+
+    if not phi:
+        rf_phase_part = 1.0
+    else:
+        rf_phase_part = np.exp(1j*phi)
+
+    if not (c_shift and del_B0):
+        freq_shift_part = 1.0
+    else:
+        df = 0.0
+        if c_shift is not None:
+            df = df + c_shift
+        if del_B0 is not None:
+            df = df + (42577478518e6 * del_B0)
+
+        freq_shift_part = np.exp(-1j*2*np.pi*df*TE)
+
+    S = M0 * T1_part * T2_part * rf_phase_part * freq_shift_part  
+    return S
