@@ -1,5 +1,6 @@
 # qmrpy
 A package for quantitative MRI in python
+https://docs.google.com/presentation/d/1bt7xRnlqC5lGCz0eDHNPeNvKrJSu58V6SSy09GYhwSA/edit?usp=sharing
 
 ## Intro
 Quantitative MRI analysis involves fitting models of the MRI signal from experiments that systematically vary image acquisition parameters to estimate intrinsic physical magnetic properties of the object being imaged that serve as quantitative physiological biomarkers.
