@@ -30,19 +30,25 @@ class SPGR_T1w_mag(BaseModel):
         self.fit_results = np.zeros(self.images.shape[:-1]+[self.n_fit_params])
         (nx,ny,nz) = self.images.shape[:-1]
 
-        # put parameter estimate code here
-        param_est_M0 = None;
-        param_est_T1 = None;
-
-        param_est = [param_est_M0, param_est_T1]
+        # implement supplying estimates and bounds later
+        calc_param_est_flag = True
+        calc_bnds_flag = True
         
-        # put optional upper and lower bound code here
-        lower_bounds = [None, None]
-        upper_bounds = [None, None] # ?????? do this?
-
         for xi in range(nx):
             for yi in range(ny):
                 for zi in range(nz):
+                    if calc_param_est_flag:
+                        M0_est = np.max(np.squeeze(self.images[xi,yi,zi,:]))
+                        S1 = self.images[xi,yi,zi,0]
+                        S2 = self.images[xi,yi,zi,1]
+
+                        fa1 = self.alpha[0]
+                        fa2 = self.alpha[1]
+                        
+                        T1_est = -1.0 * TR / np.log((S1/np.sin(self.fa1) - S2/np.sin(fa2)) / (S1/np.tan(fa1) - S2/np.tan(fa2)))
+
+                        param_est = [M0_est, T1_est]
+                        
                     result = least_squares(self.residuals,
                                            param_est)
 
