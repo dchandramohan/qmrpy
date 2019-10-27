@@ -35,7 +35,7 @@ class SPGR_T2strw_complex(BaseModel):
         return S_hat - obs_sig
 
     def fit(self, least_sq_opts=None, param_est_init=None, param_bnds=None):
-        self.fit_results = np.zeros(self.images.shape[:-1] + (self.n_fit_params,))
+        self.fit_results = np.zeros(self.images.shape[:-1] + (self.n_fit_params,), dtype=self.images.dtype)
         (nx,ny,nz) = self.images.shape[:-1] # ASSUMING 4-D images...
 
         calc_param_est_flag = True
@@ -52,7 +52,6 @@ class SPGR_T2strw_complex(BaseModel):
 
                     result = least_squares(self.residuals,
                                            param_est,
-                                           bounds=bnds,
                                            args=[self.images[xi,yi,zi,:]])
 
                     self.fit_results[xi,yi,zi,:] = result.x
@@ -61,15 +60,15 @@ class SPGR_T2strw_complex(BaseModel):
         M0_est = np.max(voxel_signal)
         T2str_est = (np.log(voxel_signal[1]) - np.log(voxel_signal[0]))/(self.TE[1] - self.TE[0]) 
         
-        M0_est = M0_est if (M0_est > 1.0) else 1.0
-        T2str_est = T2str_est if (T2str_est > 0.0) else 0.04
+        M0_est = 1.0 # M0_est if (M0_est > 1.0) else 1.0
+        T2str_est = 0.04 # T2str_est if (T2str_est > 0.0) else 0.04
         df_est = 0.0
         phi_est = 0.0
 
-        M0_est = np.min(np.max(M0_est,bnds[0][0]),bnds[1][0])
-        T2str_est = np.min(np.max(T2str_est,bnds[0][1]),bnds[1][1])
-        M0_est = np.min(np.max(M0_est,bnds[0][2]),bnds[1][2])
-        M0_est = np.min(np.max(M0_est,bnds[0][3]),bnds[1][3])
+        #M0_est = np.min(np.max(M0_est,bnds[0][0]),bnds[1][0])
+        #T2str_est = np.min(np.max(T2str_est,bnds[0][1]),bnds[1][1])
+        #M0_est = np.min(np.max(M0_est,bnds[0][2]),bnds[1][2])
+        #M0_est = np.min(np.max(M0_est,bnds[0][3]),bnds[1][3])
 
         return [M0_est, T2str_est, df_est, phi_est]
 
