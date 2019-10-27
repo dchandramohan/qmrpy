@@ -39,37 +39,42 @@ class SPGR_T1w_mag(BaseModel):
         for xi in range(nx):
             for yi in range(ny):
                 for zi in range(nz):
-                    if len(np.array(param_est_init).shape) == 1:
+                    if param_est_init == None:
+                        param_est = self.calc_param_est()
+                    elif len(np.array(param_est_init).shape) == 1:
                         assert len(param_est_init) == self.n_fit_params, 'Incorrect number of parameter estimates'
                         param_est = param_est_init
-                    else if param_est_init.shape == (nx, ny, nz):
+                    elif param_est_init.shape == (nx, ny, nz):
                         param_est = param_est_init[xi, yi, zi]
-                    else if calc_param_est_flag:
-                        # M0_est = np.max(np.squeeze(self.images[xi,yi,zi,:]))
-                        # S1 = self.images[xi,yi,zi,0]
-                        # S2 = self.images[xi,yi,zi,1]
-                        #
-                        # fa1 = self.alpha[0]
-                        # fa2 = self.alpha[1]
-                        #
-                        # T1_est = -1.0 * self.TR / np.log((S1/np.sin(fa1) - S2/np.sin(fa2)) / (S1/np.tan(fa1) - S2/np.tan(fa2)))
-                        #
-                        # param_est = [M0_est, T1_est]
-                        param_est = self.calc_param_est()
+                    # elif calc_param_est_flag:
+                    #     M0_est = np.max(np.squeeze(self.images[xi,yi,zi,:]))
+                    #     S1 = self.images[xi,yi,zi,0]
+                    #     S2 = self.images[xi,yi,zi,1]
+                    #
+                    #     fa1 = self.alpha[0]
+                    #     fa2 = self.alpha[1]
+                    #
+                    #     T1_est = -1.0 * self.TR / np.log((S1/np.sin(fa1) - S2/np.sin(fa2)) / (S1/np.tan(fa1) - S2/np.tan(fa2)))
+                    #
+                    #     param_est = [M0_est, T1_est]
 
-                    if len(np.array(param_bnds[0]).shape) == 1:
+                    if param_bnds == None:
+                        bnds = param_bnds
+                    elif len(np.array(param_bnds[0]).shape) == 1:
                         assert len(np.array(param_bnds[0])) == len(np.array(param_bnds[1])) == self.n_fit_params, \
                             'Incorrect number of parameter estimates'
                         bnds = param_bnds
-                    else if param_bnds[0].shape == param_bnds[1].shape == (nx, ny, nz):
+                    elif param_bnds[0].shape == param_bnds[1].shape == (nx, ny, nz):
                         bnds = param_bnds[xi, yi, zi]
-                    else if calc_bnds_flag:
+                    elif calc_bnds_flag:
                         bnds = self.calc_bounds()
-                    else:
-                        assert param_bnds == None, 'Invalid parameter bounds'
 
-                    result = least_squares(self.residuals,
-                                           param_est,args=[self.images[xi,yi,zi,:]],bounds=bnds)
+                    if bnds == None:
+                        result = least_squares(self.residuals,
+                                               param_est,args=[self.images[xi,yi,zi,:]])
+                    else:
+                        result = least_squares(self.residuals,
+                                               param_est,args=[self.images[xi,yi,zi,:]],bounds=bnds)
 
                     self.fit_results[xi,yi,zi,:] = result.x
 
