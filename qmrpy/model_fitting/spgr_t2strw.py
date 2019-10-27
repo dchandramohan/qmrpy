@@ -44,10 +44,11 @@ class SPGR_T2strw_complex(BaseModel):
         for xi in range(nx):
             for yi in range(ny):
                 for zi in range(nz):
-                    if calc_param_est_flag:
-                        param_est = self.calc_param_est(self.images[xi,yi,zi,:])
                     if calc_bnds_flag:
                         bnds = self.calc_bnds()
+                        
+                    if calc_param_est_flag:
+                        param_est = self.calc_param_est(self.images[xi,yi,zi,:], bnds)
 
                     result = least_squares(self.residuals,
                                            param_est,
@@ -56,7 +57,7 @@ class SPGR_T2strw_complex(BaseModel):
 
                     self.fit_results[xi,yi,zi,:] = result.x
 
-    def calc_param_est(self, voxel_signal):
+    def calc_param_est(self, voxel_signal, bnds):
         M0_est = np.max(voxel_signal)
         T2str_est = (np.log(voxel_signal[1]) - np.log(voxel_signal[0]))/(self.TE[1] - self.TE[0]) 
         
@@ -64,6 +65,11 @@ class SPGR_T2strw_complex(BaseModel):
         T2str_est = T2str_est if (T2str_est > 0.0) else 0.04
         df_est = 0.0
         phi_est = 0.0
+
+        M0_est = np.min(np.max(M0_est,bnds[0][0]),bnds[1][0])
+        T2str_est = np.min(np.max(T2str_est,bnds[0][1]),bnds[1][1])
+        M0_est = np.min(np.max(M0_est,bnds[0][2]),bnds[1][2])
+        M0_est = np.min(np.max(M0_est,bnds[0][3]),bnds[1][3])
 
         return [M0_est, T2str_est, df_est, phi_est]
 
