@@ -16,6 +16,22 @@ class Test_SPGR_T1w_mag(unittest.TestCase):
         test_M0 = 1.0
         test_T1 = 0.008
 
+        sim_signal = qmrpy.signal_equations.spgr.T1w_mag(test_M0, test_T1, test_TR, test_alpha)
+        test_image = np.reshape(sim_signal,[1,1,1,len(sim_signal)])
+
+        fit_object = qmrpy.model_fitting.spgr.SPGR_T1w_mag(test_TR, test_alpha)
+        fit_object.load_input_images(test_image)
+        fit_object.fit()
+
+        npt.assert_allclose(fit_object.fit_results[0,0,0,:],np.array([test_M0,test_T1]))
+
+    def test_fit_est_and_bnds(self):
+        test_alpha = np.linspace(6,90,10)
+        test_TR = 0.05
+
+        test_M0 = 1.0
+        test_T1 = 0.008
+
         test_param_est = [1, 0.8]
         test_param_bounds = ([0,0], [2,5])
 
