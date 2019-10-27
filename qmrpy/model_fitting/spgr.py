@@ -1,7 +1,9 @@
 
+import numpy as np
+from scipy.optimize import least_squares
+
 from .base_model import BaseModel
 from ..signal_equations import spgr
-from scipy.optimize import least_squares
 
 class SPGR_T1w_mag(BaseModel):
 
@@ -14,7 +16,7 @@ class SPGR_T1w_mag(BaseModel):
         return
 
     def load_input_images(self, input_images):
-        if not input_images.shape[-1] == len(alpha):
+        if not input_images.shape[-1] == len(self.alpha):
             raise Exception('Hey there! this is no good!')
 
         self.images = input_images
@@ -26,10 +28,10 @@ class SPGR_T1w_mag(BaseModel):
         S_hat = spgr.T1w_mag(K, T1, self.TR, self.alpha)
         return S_hat - obs_sig
 
-    def fit(self, **kwargs, least_sq_opts=None):
-        self.fit_results = np.zeros(self.images.shape[:-1]+[self.n_fit_params])
+    def fit(self, least_sq_opts=None, param_est_init=None, param_bnds=None):
+        self.fit_results = np.zeros(list(self.images.shape[:-1])+[self.n_fit_params])
         (nx,ny,nz) = self.images.shape[:-1]
-
+        
         # implement supplying estimates and bounds later
         calc_param_est_flag = True
         calc_bnds_flag = True
@@ -45,13 +47,13 @@ class SPGR_T1w_mag(BaseModel):
                         fa1 = self.alpha[0]
                         fa2 = self.alpha[1]
                         
-                        T1_est = -1.0 * TR / np.log((S1/np.sin(self.fa1) - S2/np.sin(fa2)) / (S1/np.tan(fa1) - S2/np.tan(fa2)))
+                        T1_est = -1.0 * self.TR / np.log((S1/np.sin(fa1) - S2/np.sin(fa2)) / (S1/np.tan(fa1) - S2/np.tan(fa2)))
 
                         param_est = [M0_est, T1_est]
                         
                     result = least_squares(self.residuals,
-                                           param_est)
-
+                                           param_est,args=[self.images[xi,yi,zi,:]])
+                    
                     self.fit_results[xi,yi,zi,:] = result.x
 
         return

@@ -12,7 +12,7 @@ class BaseModel(abc.ABC):
         pass
     
     @abc.abstractmethod
-    def fit(self, **kwargs, least_sq_opts=None):
+    def fit(self, least_sq_opts=None, **kwargs):
         pass
 
     @abc.abstractmethod
